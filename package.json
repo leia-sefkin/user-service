@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=development && nodemon src/server.js",
-    "test": "export DATABASE_URL='mongodb://localhost:27017/test' && nodemon --exec 'mocha'",
+    "dev": "NODE_ENV=development && nodemon src/server.js",
+    "prod": "NODE_ENV=production && nodemon src/server.js",
+    "test": "NODE_ENV=test && nodemon --exec 'mocha'",
     "coverage": "nyc --reporter=html --reporter=text mocha --exit --timeout 15000"
   },
   "keywords": [],

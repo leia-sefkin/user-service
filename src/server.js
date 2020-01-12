@@ -23,7 +23,7 @@ app.use(function(err, req, res, next) {
   res.status(err.statusCode).send(err.message); 
 });
 
-connectDb(process.env.DATABASE_URL).then(async () => {
+connectDb().then(async () => {
   app.listen(port, () =>
     logger.info(`App listening on port ${port}!`)
   );

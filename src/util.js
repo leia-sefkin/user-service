@@ -22,7 +22,15 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 //a simple utility for connecting to the DB 
-const connectDb = function(url) {
+const connectDb = function() {
+	let url;
+
+	//load test database appropriately
+	if (process.env.NODE_ENV === 'test') {
+		url = process.env.TEST_DATABASE_URL;
+	} else {
+		url = process.env.DATABASE_URL;
+	}
 	
 	return mongoose.connect(url)
 	.then(function ()  {

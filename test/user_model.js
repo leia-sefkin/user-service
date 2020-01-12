@@ -4,8 +4,6 @@ const chai = require('chai'),
 const request = require('supertest');
 const app = require('../src/server');
 
-let user = 
-
 
 describe('Users API tests', function() {
 
