@@ -16,7 +16,7 @@ app.use('/', router);
 
 app.use(function(err, req, res, next) {
 	if (err) {
-		logger.error('error in the code: ', err);
+		logger.error(`Error in the code: ${err}`);
 	}
 	//set a status code on the error if we don't have one
   if (!err.statusCode) err.statusCode = 500; 
