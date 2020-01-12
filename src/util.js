@@ -24,7 +24,7 @@ if (process.env.NODE_ENV !== 'production') {
 //a simple utility for connecting to the DB 
 const connectDb = function(url) {
 	
-	return mongoose.connect(url, {useMongoClient: true})
+	return mongoose.connect(url)
 	.then(function ()  {
 		logger.info(`DB connection successful at url: ${url}`);
 		
