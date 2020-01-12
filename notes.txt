@@ -1,0 +1,39 @@
+
+create 
+curl -X POST -H "Content-Type: application/json" -d '{
+  "user_id": 123416,
+  "first_name": "mailo",
+  "last_name" : "dawg",
+  "zip_code": 97213,
+  "email_address": "mailo@gutentag.de"
+}' http://localhost:3000/users
+
+read
+curl http://localhost:3000/users/123456
+
+update
+curl -X PUT -H "Content-Type: application/json" -d '{
+  "first_name": "bella",
+  "last_name" : "squiggs",
+  "zip_code": 222223,
+  "email_address": "bella@woof.net"
+}' http://localhost:3000/users/123456
+
+delete 
+curl -X DELETE http://localhost:3000/users/123456
+
+
+* A User rest Resource that allows clients to create, read, update, delete a user or a list of users.
+* You can use a database of your choice but it's also fine to just use a map or dictionary in memory to keep track of users by their ids.
+* Use structured logging
+* Add Metrics (such as dropwizard, codahale, or prometheus to time routes)
+* Write unit tests for the service.
+* Generate a code coverage report (for Java you can use the jacoco-maven-plugin for unit test coverage).
+* The user JSON can just be id, first name, last name, zip code, and email address.
+
+
+TODO: 
+
+Add monitoring - appmetrics?
+Add logging - wilson!
+initialize git and polish readme
