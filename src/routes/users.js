@@ -2,6 +2,7 @@ const express = require('express');
 
 let router = express.Router();
 const User = require('../models/user');
+const logger = require('../util').logger;
 
 /*
   Create a new user using the object posted to the request body, all fields are required
@@ -17,6 +18,7 @@ const User = require('../models/user');
 */
 router.post('/users', function(req, res, next) {
   const user = req.body;
+  logger.info(`Creating new user: ${user}`);
 
   return User.create({
     user_id: user.user_id,
@@ -39,11 +41,13 @@ router.post('/users', function(req, res, next) {
 */
 router.get('/users/:id', function(req, res, next) {
   const userId = req.params.id;
+  logger.info(`Looking up user by ID: ${userId}`);
 
   return User.find({
     user_id: userId
   }).then((user) => {
     if (user.length < 1) {
+      logger.error(`Requested user: ${userId} not found in DB.`);
       return res.status(404).send('User not found');
     }
 
@@ -56,9 +60,10 @@ router.get('/users/:id', function(req, res, next) {
   Retrieve a list of all users
 */
 router.get('/users', function(req, res, next) {
+  logger.info('Listing all users.');
 
-  return User.find().then((user) => {
-    return res.status(200).send(user);
+  return User.find().then((users) => {
+    return res.status(200).send(users);
   }).catch(next);
 
 });
@@ -78,6 +83,7 @@ router.get('/users', function(req, res, next) {
 router.put('/users/:id', function(req, res, next) {
   const userId = req.params.id;
   const newInfo = req.body;
+  logger.info(`Updating user ${userId} with info: ${newInfo}`);
 
   //Check that the fields exist before trying to update
   let updated = {};
@@ -106,6 +112,7 @@ router.put('/users/:id', function(req, res, next) {
     new: true
   }).then((user) => {
     if (user.length < 1) {
+      logger.error(`Requested user to update: ${userId} not found in DB.`);
       return res.status(404).send('User not found');
     }
 
@@ -123,6 +130,7 @@ router.put('/users/:id', function(req, res, next) {
 */
 router.delete('/users/:id', function(req, res, next) {
   const userId = req.params.id;
+  logger.info(`Deleting user by ID: ${userId}`);
 
   return User.findOneAndRemove({
     user_id: userId
