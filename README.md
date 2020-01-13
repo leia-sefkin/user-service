@@ -1,4 +1,4 @@
-# user-microservice
+# user-service
 
 ## Installation
 
