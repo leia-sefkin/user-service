@@ -57,6 +57,16 @@ describe('Users API tests', function() {
 	});
 
 
+  it('Will return an error when a user is not found', async function (){
+    
+    const res = await request(app)
+      .get('/users/123');
+
+    expect(res.status).to.equal(404);
+    expect(res.error).to.exist;
+  });
+
+
 	it('Can list all users', async function () {
 		const users = [{
 			user_id: 12345,
@@ -108,6 +118,15 @@ describe('Users API tests', function() {
     expect(res.body).to.have.property('first_name', update.first_name);
     expect(res.body).to.have.property('last_name', update.last_name);
 	});
+
+  it('Will return an error when updating a user that is not found', async function (){
+    
+    const res = await request(app)
+      .put('/users/123');
+
+    expect(res.status).to.equal(404);
+    expect(res.error).to.exist;
+  });
 
 	it('Can delete a user', async function (){
 		const user = new User({
