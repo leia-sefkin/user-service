@@ -16,19 +16,25 @@ const logger = require('../util').logger;
 
   Returns newly created user doc
 */
-router.post('/users', function(req, res, next) {
+router.post('/users', function(req, res) {
   const user = req.body;
-  logger.info(`Creating new user: ${user}`);
+  logger.info(`Creating new user with ID: ${user.user_id}`);
 
-  return User.create({
+  User.create({
     user_id: user.user_id,
     first_name: user.first_name,
     last_name: user.last_name,
     zip_code: user.zip_code,
     email_address: user.email_address
-  }).then((user) => {
+  }, function(err, user) {
+
+    if (err) {
+      logger.error(`Error while creating user ID: ${user.user_id} message: ${err.message}`);
+      return res.status(500).send('Server issue');
+    }
+
     return res.status(200).send(user);
-  }).catch(next);
+  });
 
 });
 
@@ -43,16 +49,24 @@ router.get('/users/:id', function(req, res, next) {
   const userId = req.params.id;
   logger.info(`Looking up user by ID: ${userId}`);
 
-  return User.find({
+  User.findOne({
     user_id: userId
-  }).then((user) => {
-    if (user.length < 1) {
+  }, function(err, user) {
+
+    if (err) {
+      logger.error(`Error while reading user ID: ${userId} message: ${err.message}`);
+      return res.status(500).send('Server issue');
+    }
+
+    if (!user) {
       logger.error(`Requested user: ${userId} not found in DB.`);
       return res.status(404).send('User not found');
     }
 
-    return res.status(200).send(user[0]);
-  }).catch(next);
+    logger.info(`Found user: ${user}`);
+
+    return res.status(200).send(user);
+  });
 
 });
 
@@ -62,9 +76,15 @@ router.get('/users/:id', function(req, res, next) {
 router.get('/users', function(req, res, next) {
   logger.info('Listing all users.');
 
-  return User.find().then((users) => {
+  User.find({}, function(err, users) {
+
+    if (err) {
+      logger.error(`Error while listing all users: ${err.message}`);
+      return res.status(500).send('Server issue');
+    }
+
     return res.status(200).send(users);
-  }).catch(next);
+  });
 
 });
 
@@ -83,7 +103,6 @@ router.get('/users', function(req, res, next) {
 router.put('/users/:id', function(req, res, next) {
   const userId = req.params.id;
   const newInfo = req.body;
-  logger.info(`Updating user ${userId} with info: ${newInfo}`);
 
   //Check that the fields exist before trying to update
   let updated = {};
@@ -103,21 +122,27 @@ router.put('/users/:id', function(req, res, next) {
     updated.email_address = newInfo.email_address;
   }
 
-  return User.findOneAndUpdate({
+  User.findOneAndUpdate({
     user_id: userId
   },
-  updated,
+    updated,
   {
     //Mongoose setting to return modified doc rather than original
     new: true
-  }).then((user) => {
-    if (user.length < 1) {
+  }, function(err, user) {
+
+    if (err) {
+      logger.error(`Error while updating user ID: ${userId} message: ${err.message}`);
+      return res.status(500).send('Server issue');
+    }
+    
+    if (!user) {
       logger.error(`Requested user to update: ${userId} not found in DB.`);
       return res.status(404).send('User not found');
     }
 
     return res.status(200).send(user);
-  }).catch(next);
+  });
 
 });
 
@@ -132,9 +157,14 @@ router.delete('/users/:id', function(req, res, next) {
   const userId = req.params.id;
   logger.info(`Deleting user by ID: ${userId}`);
 
-  return User.findOneAndRemove({
+  User.findOneAndRemove({
     user_id: userId
-  }).then(() => {
+  }, {}, function(err) {
+    if (err) {
+      logger.error(`Error while deleting user ID: ${userId} message: ${err.message}`);
+      return res.status(500).send('Server issue');
+    }
+
     return res.status(200).send('User Deleted');
   }).catch(next);
 
