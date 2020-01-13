@@ -34,6 +34,8 @@ Code coverage is generated using the [nyc module](https://github.com/istanbuljs/
 
 Prometheus is configured for tracking route response times using the [express-prom-bundle module](https://github.com/jochen-schweizer/express-prom-bundle). You can view metrics at `localhost:3000/metrics` and graphs through a running Prometheus instance. Be sure to load your prometheus with the config file located at `/prometheus-data/prometheus.yml`
 
+Logging happens via the [winston logging module](https://github.com/winstonjs/winston). Logs are output to the console as well as to an `error.log` file which collects errors, and a `comibined.log` file which collects everything. These files are stored in the root of the app directory. To change these settings update the intialization of winston in `/src/util.js`.
+
 # Usage
 
 ## POST /users
