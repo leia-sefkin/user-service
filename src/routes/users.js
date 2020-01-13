@@ -5,9 +5,11 @@ const User = require('../models/user');
 const logger = require('../util').logger;
 
 /*
-  Create a new user using the object posted to the request body, all fields are required
+  Create new user(s)
+    expects and array of user objects on the request body
+    all fields are required
 
-  @param req.body {Object} required - the user to create
+  @param req.body {[Object]} required - the user to create
   @param req.body.user_id {Number} required - user's ID, must be unique
   @param req.body.first_name {String} required - user's first name
   @param req.body.last_name {String} required - user's last name
@@ -17,23 +19,27 @@ const logger = require('../util').logger;
   Returns newly created user doc
 */
 router.post('/users', function(req, res) {
-  const user = req.body;
-  logger.info(`Creating new user with ID: ${user.user_id}`);
+  const users = req.body;
 
-  User.create({
-    user_id: user.user_id,
-    first_name: user.first_name,
-    last_name: user.last_name,
-    zip_code: user.zip_code,
-    email_address: user.email_address
-  }, function(err, user) {
+  //loop through users and make sure they're formatted correctly
+  users.map(function(user) {
+    return {
+      user_id: user.user_id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      zip_code: user.zip_code,
+      email_address: user.email_address
+    };
+  });
 
-    if (err) {
-      logger.error(`Error while creating user ID: ${user.user_id} message: ${err.message}`);
+  User.insertMany(users, function(err, users) {
+     if (err) {
+      logger.error(`Error while creating users. message: ${err.message}`);
       return res.status(500).send('Server issue');
     }
 
-    return res.status(200).send(user);
+    logger.info(`Created new users: ${users}`);
+    return res.status(200).send('success');
   });
 
 });
@@ -63,7 +69,7 @@ router.get('/users/:id', function(req, res, next) {
       return res.status(404).send('User not found');
     }
 
-    logger.info(`Found user: ${user}`);
+    logger.info(`Found user ID: ${user.user_id}`);
 
     return res.status(200).send(user);
   });

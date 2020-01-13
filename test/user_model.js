@@ -12,26 +12,57 @@ describe('Users API tests', function() {
 	});
 
 	it('Can create a user', async function() {
-		const user = {
+		const user = [{
 			user_id: 12345,
 			first_name: 'Mailo',
 			last_name: 'Dog',
 			zip_code: 12345,
 			email_address: 'woof@german.net'
-		};
+		}];
 
-    const res = await request(app)
+    let res = await request(app)
       .post('/users')
       .send(user);
 
     expect(res.status).to.equal(200);
-    expect(res.body).to.have.property('_id');
-    expect(res.body).to.have.property('user_id', user.user_id);
-    expect(res.body).to.have.property('first_name', user.first_name);
-    expect(res.body).to.have.property('last_name', user.last_name);
-    expect(res.body).to.have.property('zip_code', user.zip_code);
-    expect(res.body).to.have.property('email_address', user.email_address);
+
+    res = await request(app)
+      .get(`/users/${user[0].user_id}`);
+
+    expect(res.status).to.equal(200);
 	});
+
+  it('Can create multiple users', async function() {
+    const user1 = {
+      user_id: 12345,
+      first_name: 'Mailo',
+      last_name: 'Dog',
+      zip_code: 12345,
+      email_address: 'woof@german.net'
+    }, user2 = {
+      user_id: 456790,
+      first_name: 'Bella',
+      last_name: 'Beez',
+      zip_code: 58720,
+      email_address: 'ball@park.net'
+    };
+
+    let res = await request(app)
+      .post('/users')
+      .send([user1, user2]);
+
+    expect(res.status).to.equal(200);
+
+    res = await request(app)
+      .get(`/users/${user1.user_id}`);
+
+    expect(res.status).to.equal(200);
+
+    res = await request(app)
+      .get(`/users/${user2.user_id}`);
+
+    expect(res.status).to.equal(200);
+  });
 
 	it('Can read a user', async function (){
 		const user = new User({
@@ -48,7 +79,6 @@ describe('Users API tests', function() {
       .get(`/users/${user.user_id}`);
 
     expect(res.status).to.equal(200);
-    expect(res.body).to.have.property('_id');
     expect(res.body).to.have.property('user_id', user.user_id);
     expect(res.body).to.have.property('first_name', user.first_name);
     expect(res.body).to.have.property('last_name', user.last_name);
@@ -113,7 +143,6 @@ describe('Users API tests', function() {
 			.send(update);
 
 		expect(res.status).to.equal(200);
-    expect(res.body).to.have.property('_id');
     expect(res.body).to.have.property('user_id', user.user_id);
     expect(res.body).to.have.property('first_name', update.first_name);
     expect(res.body).to.have.property('last_name', update.last_name);
