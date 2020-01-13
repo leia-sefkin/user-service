@@ -26,9 +26,11 @@ This app runs on Express with Mongoose. [nodemon](https://www.npmjs.com/package/
 The following scripts are configured in pacakage.json
 
 From the root of the project run the following command:
- `npm run dev` or `npm run prod` - runs the app for a development or production environment
- `npm run test` - runs the mocha test suite
- `npm run coverage` - generates a code coverage report
+```
+ npm run dev or npm run prod - runs the app for a development or production environment
+ npm run test - runs the mocha test suite
+ npm run coverage - generates a code coverage report
+```
 
 Code coverage is generated using the [nyc module](https://github.com/istanbuljs/nyc). Running the command will run through the mocha tests and generate a report in the console as well as an html version loadable in browser under `/coverage/index.html`
 
