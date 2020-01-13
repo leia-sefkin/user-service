@@ -16,7 +16,7 @@ const logger = require('../util').logger;
   @param req.body.zip_code {Number} required - user's zip code
   @param req.body.email_address {String} required - user's email address
 
-  Returns newly created user doc
+  Returns success on creation
 */
 router.post('/users', function(req, res) {
   const users = req.body;
@@ -51,7 +51,7 @@ router.post('/users', function(req, res) {
 
   Returns the user found or a 404 if not found
 */
-router.get('/users/:id', function(req, res, next) {
+router.get('/users/:id', function(req, res) {
   const userId = req.params.id;
   logger.info(`Looking up user by ID: ${userId}`);
 
@@ -79,7 +79,7 @@ router.get('/users/:id', function(req, res, next) {
 /* 
   Retrieve a list of all users
 */
-router.get('/users', function(req, res, next) {
+router.get('/users', function(req, res) {
   logger.info('Listing all users.');
 
   User.find({}, function(err, users) {
@@ -95,6 +95,50 @@ router.get('/users', function(req, res, next) {
 });
 
 /*
+  Update fields on the user document
+  The only field we won't update is user_id 
+
+  @param userId {Number} required - the user ID to update
+  @param user.first_name {String} optional - user's first name
+  @param user.last_name {String} optional - user's last name
+  @param user.zip_code {Number} optional - user's zip code
+  @param user.email_address {String} optional - user's email address
+
+  Returns updated user object
+*/
+async function updateUserRecord(userId, user) {
+  logger.info(`Updating user ID: ${userId}`);
+
+  //only copy over fields we want to update
+  let updates = {};
+
+  if (user.first_name) {
+    updates.first_name = user.first_name;
+  }
+
+  if (user.last_name) {
+    updates.last_name = user.last_name;
+  }
+
+  if (user.zip_code) {
+    updates.zip_code = user.zip_code;
+  }
+
+  if (user.email_address) {
+    updates.email_address = user.email_address;
+  }
+
+  return await User.findOneAndUpdate({
+    user_id: userId
+    },
+      updates,
+    {
+      //Mongoose setting to return modified doc rather than original
+      new: true
+    });
+};
+
+/*
   Update fields on the user object
   The only field we won't update is user_id 
 
@@ -104,52 +148,50 @@ router.get('/users', function(req, res, next) {
   @param req.body.zip_code {Number} optional - user's zip code
   @param req.body.email_address {String} optional - user's email address
 
-  Returns updated user object
+  Returns success on update
 */
-router.put('/users/:id', function(req, res, next) {
+router.put('/users/:id', function(req, res) {
   const userId = req.params.id;
-  const newInfo = req.body;
+  const updates = req.body;
 
-  //Check that the fields exist before trying to update
-  let updated = {};
-  if (newInfo.first_name) {
-    updated.first_name = newInfo.first_name;
-  }
+  updateUserRecord(userId, updates).then((result) => {
+    logger.info(`updated user ID: ${userId} result: ${result}`);
 
-  if (newInfo.last_name) {
-    updated.last_name = newInfo.last_name;
-  }
-
-  if (newInfo.zip_code) {
-    updated.zip_code = newInfo.zip_code;
-  }
-
-  if (newInfo.email_address) {
-    updated.email_address = newInfo.email_address;
-  }
-
-  User.findOneAndUpdate({
-    user_id: userId
-  },
-    updated,
-  {
-    //Mongoose setting to return modified doc rather than original
-    new: true
-  }, function(err, user) {
-
-    if (err) {
-      logger.error(`Error while updating user ID: ${userId} message: ${err.message}`);
-      return res.status(500).send('Server issue');
-    }
-    
-    if (!user) {
+    if (!result) {
       logger.error(`Requested user to update: ${userId} not found in DB.`);
       return res.status(404).send('User not found');
     }
 
-    return res.status(200).send(user);
+    return res.status(200).send('Success');
+  })
+  .catch((err) => {
+    logger.error(`Error while updating user ID: ${userId} message: ${err.stack}`);
+    return res.status(500).send('Server issue');
   });
+    
+});
 
+/*
+  Update multiple users 
+    Accepts an array of user objects to update
+
+  @param req.body {[Object]} required - the array of user updates
+*/
+router.put('/users', function(req, res) {
+  const users = req.body;
+  logger.info('Updating an array of user docs');
+
+  Promise.all(users.map((user) => {
+    return updateUserRecord(user.user_id, user);
+
+  })).then(updates => {
+    logger.info(`Made updates to users, result: ${updates}`);
+
+    return res.status(200).send('Success');
+  }).catch(err => {
+    logger.error(`error while making updates ${err.stack}`);
+    return res.status(500).send('Server issue');
+  });
 });
 
 /* 
@@ -159,7 +201,7 @@ router.put('/users/:id', function(req, res, next) {
 
   Returns success on deletion
 */
-router.delete('/users/:id', function(req, res, next) {
+router.delete('/users/:id', function(req, res) {
   const userId = req.params.id;
   logger.info(`Deleting user by ID: ${userId}`);
 
@@ -172,7 +214,7 @@ router.delete('/users/:id', function(req, res, next) {
     }
 
     return res.status(200).send('User Deleted');
-  }).catch(next);
+  });
 
 });
 

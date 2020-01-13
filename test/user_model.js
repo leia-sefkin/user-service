@@ -138,11 +138,16 @@ describe('Users API tests', function() {
 			last_name: 'Zooks'
 		};
 
-		const res = await request(app)
+		let res = await request(app)
 			.put(`/users/${user.user_id}`)
 			.send(update);
 
 		expect(res.status).to.equal(200);
+
+    res = await request(app)
+      .get(`/users/${user.user_id}`);
+
+    expect(res.status).to.equal(200);
     expect(res.body).to.have.property('user_id', user.user_id);
     expect(res.body).to.have.property('first_name', update.first_name);
     expect(res.body).to.have.property('last_name', update.last_name);
@@ -155,6 +160,60 @@ describe('Users API tests', function() {
 
     expect(res.status).to.equal(404);
     expect(res.error).to.exist;
+  });
+
+
+  it('Can update multiple users', async function () {
+    const user1 = new User({
+      user_id: 12345,
+      first_name: 'Mailo',
+      last_name: 'Dog',
+      zip_code: 12345,
+      email_address: 'woof@german.net'
+    }), user2 = new User({
+      user_id: 456790,
+      first_name: 'Bella',
+      last_name: 'Beez',
+      zip_code: 58720,
+      email_address: 'ball@park.net'
+    });
+
+    await user1.save();
+    await user2.save();
+
+    const update1 = {
+      user_id: user1.user_id,
+      first_name: 'Ziggy',
+      last_name: 'Zooks'
+    };
+
+    const update2 = {
+      user_id: user2.user_id,
+      first_name: 'Tabatha',
+      last_name: 'Carl'
+    }
+
+    let res = await request(app)
+      .put(`/users/`)
+      .send([update1, update2]);
+
+    expect(res.status).to.equal(200);
+
+    res = await request(app)
+      .get(`/users/${user1.user_id}`);
+
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('user_id', user1.user_id);
+    expect(res.body).to.have.property('first_name', update1.first_name);
+    expect(res.body).to.have.property('last_name', update1.last_name);
+
+    res = await request(app)
+      .get(`/users/${user2.user_id}`);
+
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('user_id', user2.user_id);
+    expect(res.body).to.have.property('first_name', update2.first_name);
+    expect(res.body).to.have.property('last_name', update2.last_name);
   });
 
 	it('Can delete a user', async function (){
