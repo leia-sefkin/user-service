@@ -32,7 +32,12 @@ const connectDb = function() {
 		url = process.env.DATABASE_URL;
 	}
 	
-	return mongoose.connect(url)
+	return mongoose.connect(url, { 
+		//suppressing mongoose deprecation warnings
+		useFindAndModify: false,
+		useNewUrlParser: true,
+		useUnifiedTopology: true
+	})
 	.then(function ()  {
 		logger.info(`DB connection successful at url: ${url}`);
 		
