@@ -83,6 +83,7 @@ Response: Returns success on update.
 
 Use this endpoint to update multiple users at once. Will only update the fields passed in, each object must contain the field user_id in order to identify the user associated.
 
+```
 curl -X PUT -H "Content-Type: application/json" -d '[{
   "user_id": 123456,
   "first_name": "Bella",
@@ -92,7 +93,7 @@ curl -X PUT -H "Content-Type: application/json" -d '[{
   "email": "mailo@dog.de",
   "zip_code": "23451",
 }]' http://localhost:3000/users
-
+```
 
 ## DELETE /users/:id
 
